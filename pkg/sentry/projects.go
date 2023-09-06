@@ -26,6 +26,24 @@ type SentryProject struct {
 	} `json:"teams"`
 }
 
+func (sc *SentryClient) GetAllProjects(organizationSlug string) ([]SentryProject, error) {
+	allProjects := []SentryProject{}
+	url := "/api/0/organizations/" + organizationSlug + "/projects/"
+
+	for (url != "") {
+		projects := []SentryProject{}
+		nextURL, err := sc.FetchWithPagination(url, &projects)
+		if err != nil {
+			return nil, err
+		}
+
+		allProjects = append(allProjects, projects...)
+		url = nextURL
+	}
+
+	return allProjects, nil
+}
+
 func (sc *SentryClient) GetProjects(organizationSlug string) ([]SentryProject, error) {
 	out := []SentryProject{}
 	if organizationSlug == "" {
